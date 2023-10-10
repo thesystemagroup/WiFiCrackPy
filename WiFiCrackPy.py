@@ -1,3 +1,4 @@
+import socket
 import subprocess
 import argparse
 import re
